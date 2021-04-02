@@ -1,0 +1,23 @@
+if you want to make validations (simple ones) without GUI, you need to download some root files.
+By default, others scripts for validation use a local folder named DATA
+
+# you can download the files with this python script.
+# First of all you have to create a local area for the work
+
+ cmsrel CMSSW_10_6_0
+ cd CMSSW_10_6_0/src
+ cmsenv
+ mkdir DATA
+ cd DATA
+
+python /eos/project/c/cmsweb/www/egamma/validation/Electrons/quickRootDown/main.py [CMSSW_10_6_0]
+the default release is the one you have created previously but you can give another such as CMSSW_11_0_0_pre4.
+
+the script presents to you all the datasets you can use for download.
+the default datasets is [TTbar_13 ZEE_13] and yo need to insert the number of the datasets you want, 
+separated by a comma such as 78,97,98 or d if you want to use the default datasets.
+
+Then, the script gives you the list of all root files you can donload, and in a same maner as above 
+you have to insert the number of the files you want to download separated by a comma (such as 0,32) or 'a' for all.
+
+that's all.
