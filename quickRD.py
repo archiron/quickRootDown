@@ -1,27 +1,38 @@
 #! /usr/bin/env python
 #-*-coding: utf-8 -*-
 
-import os,sys,subprocess,shutil
-import urllib2
+import os,sys # ,subprocess,shutil
+#import urllib2
 import re
 
 #sys.path.append('/afs/cern.ch/user/a/archiron/lbin/ChiLib')
-sys.path.append('/eos/project-c/cmsweb/www/egamma/validation/Electrons/ChiLib')
+#sys.path.append('/eos/project-c/cmsweb/www/egamma/validation/Electrons/ChiLib')
+sys.path.append('/afs/cern.ch/work/a/archiron/private/TEST_GITCLONE/ChiLib_CMS_Validation')
 
-from networkFunctions import list_search_0, list_search_1, cmd_load_files
-from functions import getDataSet, analyzeDTS
+from networkFunctions import networkFunctions # list_search_0, list_search_1, cmd_load_files
+from functions import quickRD_Tools
+from getEnv import cms_env
 
 class quickRD(): 
     def __init__(self):
         print('begin to run')
+        net = networkFunctions()
+        cms = cms_env()
+        RDT = quickRD_Tools()
+        
         actual_dir = os.getcwd()
         print('actual_dir : %s' % actual_dir)
-        self.CMSSWBASE = os.environ['CMSSW_BASE'] # donne le repertoire de travail
-        self.CMSSWBASECMSSWRELEASEBASE = os.environ['CMSSW_RELEASE_BASE'] # donne la release et l'architecture
-        self.CMSSWBASECMSSWVERSION = os.environ['CMSSW_VERSION'] # donne la release (CMSSW_7_1_0 par exemple)
-        print('CMSSWBASE : %s' % self.CMSSWBASE)
-        print('CMSSWBASECMSSWRELEASEBASE : %s' % self.CMSSWBASECMSSWRELEASEBASE)
-        print('CMSSWBASECMSSWVERSION : %s' % self.CMSSWBASECMSSWVERSION)
+        #self.CMSSWBASE = os.environ['CMSSW_BASE'] # donne le repertoire de travail
+        #self.CMSSWBASECMSSWRELEASEBASE = os.environ['CMSSW_RELEASE_BASE'] # donne la release et l'architecture
+        #self.CMSSWBASECMSSWVERSION = os.environ['CMSSW_VERSION'] # donne la release (CMSSW_7_1_0 par exemple)
+
+        # TEMP before modifications
+        self.CMSSWBASE = cms.getCMSSWBASE() # 'afs/cern.ch/user/a/archiron/public/CMSSW_12_2_0_pre2'
+        self.CMSSWBASECMSSWRELEASEBASE = cms.getCMSSWBASECMSSWRELEASEBASE() # '/cvmfs/cms.cern.ch/slc7_amd64_gcc900/cms/cmssw/CMSSW_12_2_0_pre2'
+        self.CMSSWBASECMSSWVERSION = cms.getCMSSWBASECMSSWVERSION() # 'CMSSW_12_2_0_pre2'
+        print('CMSSWBASE : %s' % self.CMSSWBASE) # /afs/cern.ch/user/a/archiron/public/CMSSW_12_2_0_pre2
+        print('CMSSWBASECMSSWRELEASEBASE : %s' % self.CMSSWBASECMSSWRELEASEBASE) # /cvmfs/cms.cern.ch/slc7_amd64_gcc900/cms/cmssw/CMSSW_12_2_0_pre2
+        print('CMSSWBASECMSSWVERSION : %s' % self.CMSSWBASECMSSWVERSION) # CMSSW_12_2_0_pre2
         
         datasets_default = ['TTbar_13', 'ZEE_13']
         #datasets_default = ['TTbar_14TeV', 'ZEE_14']
@@ -44,7 +55,7 @@ class quickRD():
         print('RELEASE : %s' % RELEASE)
         
         # get the list for RELEASE
-        list_0 = list_search_0()
+        list_0 = net.list_search_0()
         item_0 = ''
         #print(list_0)
         for item in list_0:
@@ -60,7 +71,7 @@ class quickRD():
         else:
             print('item_0 : %s' % item_0)
 
-        releasesList_1 = list_search_1(item_0 + 'x')
+        releasesList_1 = net.list_search_1(item_0 + 'x')
         print('there is %d files for %s' % (len(releasesList_1), item_0))
         
         list_1 = []
@@ -70,7 +81,7 @@ class quickRD():
         print('there is %d files for %s' % (len(list_1), RELEASE))
         #print(list_1)
         
-        datasets = getDataSet(list_1)
+        datasets = RDT.getDataSet(list_1)
         print('there is %d datasets for %s' % (len(datasets), RELEASE))
         '''for it in datasets:
             print(it)
@@ -96,11 +107,11 @@ class quickRD():
             if (dts_list_txt == 'd'):
                 dts_list_2 = datasets_default
             else:
-                dts_list = analyzeDTS(dts_list_txt)
+                dts_list = RDT.analyzeDTS(dts_list_txt)
         else: # we cannot use default datasets
             text_to_prompt = 'insert the # of the datasets you want separated by a comma : '
             dts_list_txt = raw_input(text_to_prompt)
-            dts_list = analyzeDTS(dts_list_txt)
+            dts_list = RDT.analyzeDTS(dts_list_txt)
 
         # test if all # are < len(datasets)
         if (dts_list_txt != 'd'):
@@ -134,7 +145,7 @@ class quickRD():
         if (files_list_txt == 'a'):
             files_list = range(0, len(list_2))
         else:
-            files_list = analyzeDTS(files_list_txt)
+            files_list = RDT.analyzeDTS(files_list_txt)
         print(files_list)
 
         # test if all # are < len(datasets)
@@ -147,7 +158,7 @@ class quickRD():
         print('files final list : ' + '[' + ' '.join("{:s}".format(x) for x in files_list_2) + ']')
         
         # download
-        cmd_load_files(files_list_2, item_0+'x')
+        net.cmd_load_files(files_list_2, item_0+'x')
         
         print('end of run')
         
